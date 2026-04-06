@@ -136,6 +136,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (deleteButton.disabled) {
+      return;
+    }
+
     const activity = deleteButton.dataset.activity;
     const email = deleteButton.dataset.email;
 
@@ -144,6 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      deleteButton.disabled = true;
+
       const response = await fetch(
         `/activities/${encodeURIComponent(activity)}/participants?email=${encodeURIComponent(email)}`,
         {
@@ -171,6 +177,8 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.className = "error";
       messageDiv.classList.remove("hidden");
       console.error("Error unregistering participant:", error);
+    } finally {
+      deleteButton.disabled = false;
     }
   });
 

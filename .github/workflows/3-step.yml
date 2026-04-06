@@ -58,26 +58,21 @@ jobs:
 
       # START: Check practical exercise
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v47
-        with:
-          base_sha: ${{ github.event.repository.default_branch }}
-          files: |
-            src/static/app.js
-            src/static/styles.css
-
       - name: Check if app.js was modified
         id: check-app-js
         continue-on-error: true
         uses: actions/github-script@v7
-        env:
-          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-          TARGET_FILE: src/static/app.js
         with:
           script: |
-            const changedFiles = process.env.CHANGED_FILES.split(' ');
-            const targetFile = process.env.TARGET_FILE;
+            const targetFile = 'src/static/app.js';
+            const base = context.payload.repository.default_branch;
+            const head = context.ref.replace('refs/heads/', '');
+            const comparison = await github.rest.repos.compareCommitsWithBasehead({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              basehead: `${base}...${head}`,
+            });
+            const changedFiles = (comparison.data.files || []).map((file) => file.filename);
             if (!changedFiles.includes(targetFile)) {
               core.setFailed(`${targetFile} was not modified`);
             }
@@ -86,13 +81,17 @@ jobs:
         id: check-styles-css
         continue-on-error: true
         uses: actions/github-script@v7
-        env:
-          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-          TARGET_FILE: src/static/styles.css
         with:
           script: |
-            const changedFiles = process.env.CHANGED_FILES.split(' ');
-            const targetFile = process.env.TARGET_FILE;
+            const targetFile = 'src/static/styles.css';
+            const base = context.payload.repository.default_branch;
+            const head = context.ref.replace('refs/heads/', '');
+            const comparison = await github.rest.repos.compareCommitsWithBasehead({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              basehead: `${base}...${head}`,
+            });
+            const changedFiles = (comparison.data.files || []).map((file) => file.filename);
             if (!changedFiles.includes(targetFile)) {
               core.setFailed(`${targetFile} was not modified`);
             }

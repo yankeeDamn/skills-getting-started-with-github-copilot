@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
 
+  messageDiv.setAttribute("aria-live", "polite");
+
   function escapeHtml(value) {
     return value
       .replaceAll("&", "&amp;")
